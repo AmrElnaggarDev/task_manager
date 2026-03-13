@@ -19,7 +19,7 @@ return new class extends Migration
                   ->onDelete('cascade');
             $table->foreignId('assigned_to')->nullable()->constrained('users')
                 ->onDelete('cascade');
-            $table->string('name');
+            $table->string('title');
             $table->text('description')->nullable();
             $table->enum('status', ['todo', 'in_progress', 'done'])->default('todo');
             $table->enum('priority', ['low', 'medium', 'high'])->default('medium');
