@@ -17,6 +17,13 @@
         @endif
 
         <div class="row">
+
+            @if($projects->isEmpty())
+                <div class="col-12">
+                    <p class="text-muted">No projects yet. Create your first one!</p>
+                </div>
+            @endif
+
             @foreach($projects as $project)
                 <div class="col-md-4 mb-4">
                     <div class="card">
@@ -24,7 +31,7 @@
                             <h5 class="card-title">{{ $project->name }}</h5>
                             <p class="card-text">{{ $project->description }}</p>
 
-                            <div class="d-flex gap-2 mt-2">
+                            <div class="d-flex gap-2 mt-2 mb-3">
                                 <span class="badge bg-secondary">To Do: {{ $project->to_do_tasks }}</span>
                                 <span class="badge bg-warning">In Progress: {{ $project->in_progress }}</span>
                                 <span class="badge bg-success">Done: {{ $project->done }}</span>
@@ -43,11 +50,6 @@
                 </div>
             @endforeach
 
-                @if($projects->isEmpty())
-                    <div class="col-12">
-                        <p class="text-muted">No projects yet. Create your first one!</p>
-                    </div>
-                @endif
         </div>
     </div>
 @endsection
