@@ -1,3 +1,4 @@
+@php use App\Models\Project; @endphp
 <!DOCTYPE html>
 <html lang="en">
 
@@ -128,6 +129,7 @@
                 <i class="bi bi-folder"></i> Projects
             </a>
         </li>
+
         <li class="nav-item">
             <a class="nav-link {{ request()->is('tasks*') ? 'active' : '' }}" href="{{ route('projects.index') }}">
                 <i class="bi bi-check2-square"></i> Tasks
