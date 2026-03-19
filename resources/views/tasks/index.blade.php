@@ -123,14 +123,19 @@
 
                             <td class="text-end">
                                 <a href="{{route('tasks.show', $task->id)}}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a>
-                                <a href="{{route('tasks.edit', $task->id)}}" class="btn btn-sm btn-outline-warning"><i class="bi bi-pencil-square"></i></a>
-                                <form action="{{route('tasks.destroy', $task->id)}}" method="POST" class="d-inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </form>
+                                @can('update', $task)
+                                    <a href="{{route('tasks.edit', $task->id)}}" class="btn btn-sm btn-outline-warning"><i class="bi bi-pencil-square"></i></a>
+                                @endcan
+
+                                @can('delete', $task)
+                                    <form action="{{route('tasks.destroy', $task->id)}}" method="POST" class="d-inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                @endcan
                             </td>
                         </tr>
                     @endforeach

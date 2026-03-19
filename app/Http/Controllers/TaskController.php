@@ -13,6 +13,8 @@ class TaskController extends Controller
      */
     public function index(Project $project)
     {
+        $this->authorize('viewAny', [Task::class, $project]);
+
         $tasks = $project->tasks()
             ->when(\request('status'), fn($query) => $query->where('status', \request('status')))
             ->orderBy('status')
@@ -26,6 +28,8 @@ class TaskController extends Controller
      */
     public function create(Project $project)
     {
+        $this->authorize('create', [Task::class, $project]);
+
         $users = $project->members()->get();
         return view('tasks.create', compact('project', 'users'));
     }
@@ -35,6 +39,8 @@ class TaskController extends Controller
      */
     public function store(Request $request, Project $project)
     {
+        $this->authorize('create', [Task::class, $project]);
+
         $attributes = $request->validate([
             'assigned_to' => 'nullable|integer|exists:users,id',
             'title' => 'required|string|max:255',
@@ -58,6 +64,9 @@ class TaskController extends Controller
     public function show(Task $task)
     {
         $project = $task->project;
+
+        $this->authorize('view', [$task, $project]);
+
         $users = $project->members()->get();
         return view('tasks.show', compact('task', 'project', 'users'));
     }
@@ -67,6 +76,8 @@ class TaskController extends Controller
      */
     public function edit(Task $task)
     {
+        $this->authorize ('update', $task);
+
         $project = $task->project;
         $users = $project->members()->get();
         return view('tasks.edit', compact('task', 'project', 'users'));
@@ -77,6 +88,8 @@ class TaskController extends Controller
      */
     public function update(Request $request, Task $task)
     {
+        $this->authorize ('update', $task);
+
         $attributes = $request->validate([
             'title' => 'required|string|max:255|',
             'description' => 'nullable|string|',
@@ -94,6 +107,8 @@ class TaskController extends Controller
      */
     public function destroy(Task $task)
     {
+        $this->authorize ('delete', $task);
+
         $task->delete();
         return redirect()->route('tasks.index', $task->project_id)->with('success', 'Task deleted.');    }
 }
