@@ -13,6 +13,8 @@ class ProjectController extends Controller
      */
     public function index()
     {
+        $this->authorize('viewAny', Project::class);
+
         $projects = Auth::user()->ownedProjects()->withCount ([
             'tasks as to_do_tasks' => function ($query) {
             $query->where ('status', 'todo');
@@ -32,6 +34,8 @@ class ProjectController extends Controller
      */
     public function create()
     {
+        $this->authorize('create', Project::class);
+
         return view ('projects.create');
     }
 
@@ -40,6 +44,8 @@ class ProjectController extends Controller
      */
     public function store(Request $request)
     {
+        $this->authorize('create', Project::class);
+
         // validate
         $attributes = $request->validate([
             'name' => 'required|string|max:255|unique:projects,name',
@@ -58,6 +64,8 @@ class ProjectController extends Controller
      */
     public function show(Project $project)
     {
+        $this->authorize('view', $project);
+
         $teamMembers = $project->members()->get();
         $owner = $project->owner();
         return view('projects.show', compact('project', 'teamMembers', 'owner'));
@@ -68,6 +76,8 @@ class ProjectController extends Controller
      */
     public function edit(Project $project)
     {
+        $this->authorize('update', $project);
+
         return view('projects.edit', compact('project'));
     }
 
@@ -77,6 +87,8 @@ class ProjectController extends Controller
      */
     public function update(Request $request, Project $project)
     {
+        $this->authorize('update', $project);
+
         $attributes = $request->validate([
             'name' => 'required|string|max:255|unique:projects,name,'.$project->id,
             'description' => 'nullable|string|',
@@ -91,6 +103,8 @@ class ProjectController extends Controller
      */
     public function destroy(Project $project)
     {
+        $this->authorize('delete', $project);
+
         $project->delete();
         return redirect()->route('projects.index')->with('success', 'Project deleted successfully');
     }

@@ -10,14 +10,19 @@
         <div class="d-flex justify-content-between align-items-center bg-white mb-4 shadow-sm p-3 rounded">
             <h2 class="mb-0">{{$task->title}}</h2>
             <div class="d-flex gap-2">
-                <a href="{{route('tasks.edit', $task->id)}}" class="btn btn-warning"><i class="bi bi-pencil-square"></i> Edit</a>
-                <form action="{{route('tasks.destroy', $task->id)}}" method="POST" class="d-inline">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this task?')">
-                        <i class="bi bi-trash"></i> Delete
-                    </button>
-                </form>
+                @can('update', $task)
+                    <a href="{{route('tasks.edit', $task->id)}}" class="btn btn-warning"><i class="bi bi-pencil-square"></i> Edit</a>
+                @endcan
+
+                @can('delete', $task)
+                        <form action="{{route('tasks.destroy', $task->id)}}" method="POST" class="d-inline">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this task?')">
+                                <i class="bi bi-trash"></i> Delete
+                            </button>
+                        </form>
+                    @endcan
             </div>
         </div>
 

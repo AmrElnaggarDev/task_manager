@@ -32,7 +32,26 @@
                                 {{ round($progress) }}%</div>
                         </div>
 
-                        <a href="{{ route('projects.index') }}" class="btn btn-secondary mt-3">Back to Projects</a>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-3">
+                        <a href="{{ route('projects.index') }}" class="btn btn-secondary">Back to Projects</a>
+
+                        @can('update', $project)
+                            <a href="{{ route('projects.edit', $project->id) }}" class="btn btn-warning">
+                                <i class="bi bi-pencil-square"></i> Edit Project
+                            </a>
+                        @endcan
+
+                        @can('delete', $project)
+                            <form action="{{ route('projects.destroy', $project->id) }}" method="POST" class="d-inline">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this project?')">
+                                    <i class="bi bi-trash"></i> Delete
+                                </button>
+                            </form>
+                        @endcan
                     </div>
                 </div>
             </div>
