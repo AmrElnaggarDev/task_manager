@@ -14,6 +14,11 @@ class Task extends Model
         'project_id', 'created_by', 'assigned_to', 'title', 'description', 'status', 'priority', 'deadline',
     ];
 
+    protected $casts = [
+        'deadline' => 'datetime',
+
+    ];
+
     public function creator() :BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');

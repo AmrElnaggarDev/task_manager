@@ -131,7 +131,7 @@
         </li>
 
         <li class="nav-item">
-            <a class="nav-link {{ request()->is('tasks*') ? 'active' : '' }}" href="{{ route('projects.index') }}">
+            <a class="nav-link {{ request()->is('projects/*/tasks*') ? 'active' : '' }}" href="{{ route('projects.index') }}">
                 <i class="bi bi-check2-square"></i> Tasks
             </a>
         </li>
