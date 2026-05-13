@@ -67,7 +67,9 @@ class ProjectController extends Controller
         $this->authorize('view', $project);
 
         $teamMembers = $project->members()->get();
-        $owner = $project->owner();
+        $owner = $project->owner;
+
+
         return view('projects.show', compact('project', 'teamMembers', 'owner'));
     }
 
