@@ -1,3 +1,4 @@
+@php use Illuminate\Support\Str; @endphp
 @extends('layouts.app')
 @section('title')
     {{ $project->name }} - Project Details
@@ -11,6 +12,24 @@
                 {{ session('success') }}
             </div>
         @endif
+
+        @if (session('error'))
+            <div class="alert alert-danger">
+                {{ session('error') }}
+            </div>
+        @endif
+
+        @if ($errors->any())
+            <div class="alert alert-danger">
+                <ul class="mb-0">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+
         <div class="row">
             <div class="col-md-7">
                 <div class="card mb-4 shadow-sm">
@@ -56,32 +75,154 @@
                 </div>
             </div>
             <div class="col-md-5">
+                {{-- Team Members --}}
                 <div class="card mb-4 shadow-sm">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between">
-                            <h5 class="card-title"> Team Members </h5>
-                            <button type="button" class="btn btn-primary" data-bs-toggle="modal"
-                                    data-bs-target="#addMemberModal"> <i class="bi bi-plus-circle"></i> </button>
+
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <h5 class="card-title mb-1">Team Members</h5>
+                                <p class="text-muted small mb-0">
+                                    Manage users who can access this project.
+                                </p>
+                            </div>
+
+                            @can('update', $project)
+                                <button type="button"
+                                        class="btn btn-primary"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#addMemberModal">
+                                    <i class="bi bi-plus-circle"></i>
+                                </button>
+                            @endcan
                         </div>
 
+                        {{-- Owner info --}}
+                        <div class="border rounded p-3 mb-3 bg-light">
+                            <small class="text-muted d-block mb-2">Project Owner</small>
+
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="rounded-circle bg-dark text-white d-flex align-items-center justify-content-center"
+                                     style="width:35px;height:35px;font-size:13px;flex-shrink:0;">
+                                    {{Str::substr(strtoupper($owner->name), 0, 1)}}
+                                </div>
+
+                                <div>
+                                    <div class="fw-semibold small">
+                                        {{$owner->name}}
+                                    </div>
+                                    <div class="text-muted small">
+                                        {{$owner->email}}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Members list --}}
                         <div class="row">
-                            @foreach ($teamMembers as $user)
+
+                            @forelse($teamMembers as $teamMember)
+                                {{-- Member item example --}}
                                 <div class="col-12">
-                                    <div class="card mb-3">
-                                        <div class="row g-0">
-                                            <div class="col-md-12">
-                                                <div class="card-body">
-                                                    <p class="card-title fw-bolder">{{ $user->name }}</p>
-                                                    <p class="card-text">{{ $user->email }}</p>
+                                    <div class="border rounded p-3 mb-2">
+                                        <div class="d-flex justify-content-between align-items-center gap-3">
+
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
+                                                     style="width:35px;height:35px;font-size:13px;flex-shrink:0;">
+                                                    {{Str::substr (strtoupper($teamMember->name), 0, 1)}}
+                                                </div>
+
+                                                <div>
+                                                    <div class="fw-semibold small">
+                                                        {{$teamMember->name}}
+                                                    </div>
+                                                    <div class="text-muted small">
+                                                        {{ $teamMember->email }}
+                                                    </div>
                                                 </div>
                                             </div>
+
+                                            @can('update', $project)
+                                                <form action="{{route('projects.members.destroy', [$project, $teamMember])}}" method="POST" class="m-0">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit"
+                                                            class="btn btn-sm btn-outline-danger"
+                                                            onclick="return confirm('Remove this member from the project?')">
+                                                        <i class="bi bi-x-circle"></i>
+                                                    </button>
+                                                </form>
+                                            @endcan
+
                                         </div>
                                     </div>
                                 </div>
-                            @endforeach
+
+                            @empty
+                                <div class="col-12">
+                                    <div class="text-center text-muted py-4">
+                                        <i class="bi bi-people fs-2 d-block mb-2"></i>
+                                        No team members yet.
+                                    </div>
+                                </div>
+                            @endforelse
+
+
+
+
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Add Member Modal --}}
+    <div class="modal fade" id="addMemberModal" tabindex="-1" aria-labelledby="addMemberModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addMemberModalLabel">
+                        Add Team Member
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <form action="{{route('projects.members.store', $project)}}" method="POST">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="member_email" class="form-label">User Email</label>
+
+                            <input type="email"
+                                   name="email"
+                                   id="member_email"
+                                   class="form-control"
+                                   placeholder="Enter registered user email"
+                            value="{{old('email')}}">
+
+                            <small class="text-muted">
+                                The user must already have an account.
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button"
+                                class="btn btn-secondary"
+                                data-bs-dismiss="modal">
+                            Cancel
+                        </button>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-person-plus"></i>
+                            Add Member
+                        </button>
+                    </div>
+                </form>
+
             </div>
         </div>
     </div>
