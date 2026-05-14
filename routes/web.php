@@ -4,15 +4,14 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectMemberController;
+use App\Http\Controllers\TaskCommentController;
 use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Route;
 
-// المسارات العامة
 Route::get('/', function () {
     return view('welcome');
 });
 
-// المسارات المحمية بـ Auth
 Route::middleware(['auth', 'verified'])->group(function () {
 
     // Dashboard
@@ -23,7 +22,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Projects (Resource)
+    // Projects
     Route::resource('projects', ProjectController::class);
 
     // Tasks (Nested under projects where needed)
@@ -39,6 +38,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Project Members
     Route::post('projects/{project}/members', [ProjectMemberController::class, 'store'])->name('projects.members.store');
     Route::delete('projects/{project}/members/{user}', [ProjectMemberController::class, 'destroy'])->name('projects.members.destroy');
+
+    // Task Comments
+    Route::post('tasks/{task}/comments', [TaskCommentController::class, 'store'])->name('tasks.comments.store');
+    Route::delete('tasks/{task}/comments/{comment}', [TaskCommentController::class, 'destroy'])->name('tasks.comments.destroy');
 });
 
 require __DIR__.'/auth.php';

@@ -68,7 +68,9 @@ class TaskController extends Controller
         $this->authorize('view', [$task, $project]);
 
         $users = $project->members()->get();
-        return view('tasks.show', compact('task', 'project', 'users'));
+
+        $comments = $task->comments()->with('user')->oldest()->get();
+        return view('tasks.show', compact('task', 'project', 'users', 'comments'));
     }
 
     /**
