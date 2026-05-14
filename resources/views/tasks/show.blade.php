@@ -1,3 +1,4 @@
+@php use Illuminate\Support\Str; @endphp
 @extends('layouts.app')
 @section('title')
     {{$project->name}}
@@ -152,7 +153,114 @@
 
             </div>
 
+
         </div>
+
+        {{-- Comments Section --}}
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-body">
+
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <h5 class="card-title mb-1">Comments</h5>
+                                <p class="text-muted small mb-0">
+                                    Discuss updates and notes related to this task.
+                                </p>
+                            </div>
+                        </div>
+
+                        {{-- Add Comment Form --}}
+                        <form action="{{route('tasks.comments.store', $task)}}" method="POST" class="mb-4">
+                            @csrf
+
+                            <div class="mb-3">
+                                <label for="comment_body" class="form-label">Add a comment</label>
+
+                                <textarea name="body"
+                                          id="comment_body"
+                                          rows="3"
+                                          class="form-control"
+                                          placeholder="Write your comment here..."></textarea>
+
+                                @error('body')
+                                <div class="text-danger small mt-1">{{ $message }}</div>
+                                @enderror
+
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-chat-left-text"></i>
+                                Add Comment
+                            </button>
+                        </form>
+
+                        <hr>
+
+                        {{-- Comments List --}}
+                        <div>
+
+                            @forelse($comments as $comment)
+                                {{-- Comment item example --}}
+                                <div class="border rounded p-3 mb-3">
+                                    <div class="d-flex justify-content-between align-items-start gap-3">
+
+                                        <div class="d-flex gap-2">
+                                            <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center"
+                                                 style="width:35px;height:35px;font-size:13px;flex-shrink:0;">
+                                                {{ Str::substr(strtoupper($comment->user->name), 0, 1) }}
+                                            </div>
+
+                                            <div>
+                                                <div class="d-flex align-items-center gap-2 mb-1">
+                                        <span class="fw-semibold small">
+                                            {{ $comment->user->name }}
+                                        </span>
+
+                                                    <span class="text-muted small">
+                                            {{ $comment->created_at->diffForHumans() }}
+                                        </span>
+                                                </div>
+
+                                                <p class="mb-0 text-muted" style="line-height: 1.7;">
+                                                    {{ $comment->body }}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        @can('delete', $comment)
+                                            <form action="{{route('tasks.comments.destroy', [$task, $comment])}}" method="POST" class="m-0">
+                                                @csrf
+                                                @method('DELETE')
+
+                                                <button type="submit"
+                                                        class="btn btn-sm btn-outline-danger"
+                                                        onclick="return confirm('Delete this comment?')">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        @endcan
+
+                                    </div>
+                                </div>
+
+                            @empty
+                                <div class="text-center text-muted py-4">
+                                    <i class="bi bi-chat-dots fs-2 d-block mb-2"></i>
+                                    No comments yet.
+                                </div>
+
+                            @endforelse
+
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
 
         <a href="{{route('tasks.index', $project->id)}}" class="text-muted small">
             <i class="bi bi-arrow-left me-1"></i> Back to Tasks
