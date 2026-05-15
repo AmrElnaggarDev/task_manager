@@ -63,12 +63,16 @@
                     {{-- Assign To --}}
                     <div class="mb-3">
                         <label for="assigned_to" class="form-label">Assign To</label>
+
                         <select name="assigned_to" id="assigned_to" class="form-select">
                             <option value="">Unassigned</option>
-                        @foreach($users as $user)
-                                <option value="{{$user->id}}">{{$user->name}}</option>
-                            @endforeach
 
+                            @foreach($assignees as $assignee)
+                                <option value="{{ $assignee->id }}"
+                                    @selected(old('assigned_to') == $assignee->id)>
+                                    {{ $assignee->name }}
+                                </option>
+                            @endforeach
                         </select>
 
                         @error('assigned_to')

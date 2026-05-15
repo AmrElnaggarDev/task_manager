@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Project;
 use App\Models\Task;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class TaskController extends Controller
 {
@@ -30,8 +31,9 @@ class TaskController extends Controller
     {
         $this->authorize('create', [Task::class, $project]);
 
-        $users = $project->members()->get();
-        return view('tasks.create', compact('project', 'users'));
+        // assignees = owner + members
+        $assignees = $project->all_possible_assignees;
+        return view('tasks.create', compact('project', 'assignees'));
     }
 
     /**
@@ -41,14 +43,26 @@ class TaskController extends Controller
     {
         $this->authorize('create', [Task::class, $project]);
 
+        $allowedAssigneeIds = $project->all_possible_assignees->pluck('id')->toArray();
+
         $attributes = $request->validate([
-            'assigned_to' => 'nullable|integer|exists:users,id',
+            'assigned_to' => [
+                'nullable',
+                'integer',
+                'exists:users,id',
+                Rule::in($allowedAssigneeIds),
+            ],
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'status' => 'required|string|in:todo,in_progress,done',
             'priority' => 'required|string|in:low,medium,high',
             'deadline' => 'nullable|date',
+
+        ], [
+            'assigned_to.in' => 'The selected assignee must be the project owner or a project member.',
         ]);
+
+
 
         $attributes['project_id'] = $project->id;
         $attributes['created_by'] = auth()->id();
@@ -81,8 +95,8 @@ class TaskController extends Controller
         $this->authorize ('update', $task);
 
         $project = $task->project;
-        $users = $project->members()->get();
-        return view('tasks.edit', compact('task', 'project', 'users'));
+        $assignees = $project->all_possible_assignees;
+        return view('tasks.edit', compact('task', 'project', 'assignees'));
     }
 
     /**
@@ -92,13 +106,24 @@ class TaskController extends Controller
     {
         $this->authorize ('update', $task);
 
+        $project = $task->project;
+        $allowedAssigneeIds = $project->all_possible_assignees->pluck('id')->toArray();
+
         $attributes = $request->validate([
+            'assigned_to' => [
+                'nullable',
+                'integer',
+                'exists:users,id',
+                Rule::in($allowedAssigneeIds),
+            ],
             'title' => 'required|string|max:255|',
             'description' => 'nullable|string|',
             'status' => 'required|string|in:todo,in_progress,done',
             'priority' => 'required|string|in:low,medium,high',
             'deadline' => 'nullable|date',
-            ]);
+            ],[
+                'assigned_to.in' => 'The selected assignee must be the project owner or a project member.',
+        ]);
 
         $task->update($attributes);
         return redirect()->route('tasks.index', $task->project_id)->with('success', 'Task updated.');
