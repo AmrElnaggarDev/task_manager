@@ -1,59 +1,200 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Task Manager
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Task Manager is a Laravel + Blade web application for managing projects, tasks, project members, task assignment, and task comments.
 
-## About Laravel
+This project was built as a backend-focused learning project to practice Laravel fundamentals such as MVC, authentication, authorization, Eloquent relationships, validation, policies, and GitHub release workflow.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Features
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- User authentication
+- Dashboard overview
+- Project CRUD
+- Task CRUD
+- Project members management
+- Task assignment restricted to project owner or project members
+- Task comments
+- Task status, priority, and deadline support
+- Authorization policies
+- Bootstrap-based Blade UI
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## Tech Stack
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- PHP
+- Laravel
+- Blade
+- Bootstrap
+- MySQL
+- Laravel Breeze
+- Eloquent ORM
+- Git & GitHub
 
-## Laravel Sponsors
+---
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## Screenshots
 
-### Premium Partners
+### Dashboard
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+![Dashboard](public/screenshots/TaskManagerDashboard.PNG)
 
-## Contributing
+### Projects
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+![Projects](public/screenshots/TaskManagerProjects.PNG)
 
-## Code of Conduct
+### Project Details with Members
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+![Project Details](public/screenshots/TaskManagerProjectShowWithMembers.PNG)
 
-## Security Vulnerabilities
+### Tasks Index
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+![Tasks Index](public/screenshots/TaskManagerTasksIndex.PNG)
 
-## License
+### Task Details with Comments
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+![Task Details](public/screenshots/TaskManagerShowTaskWithComments.png)
+
+### Edit Task
+
+![Edit Task](public/screenshots/TaskManagerEditTask.PNG)
+
+---
+
+## Core Relationships
+
+### User
+
+A user can:
+
+- Own many projects
+- Belong to many projects as a member
+- Create tasks
+- Be assigned to tasks
+- Write comments
+
+### Project
+
+A project:
+
+- Belongs to an owner
+- Has many members
+- Has many tasks
+
+### Task
+
+A task:
+
+- Belongs to a project
+- Belongs to a creator
+- May have an assignee
+- Has many comments
+
+### Comment
+
+A comment:
+
+- Belongs to a task
+- Belongs to a user
+
+---
+
+## Authorization Rules
+
+- Only project owners can update or delete their projects.
+- Project owners can add and remove project members.
+- Project owners and project members can view project tasks.
+- Tasks can only be assigned to the project owner or project members.
+- Users who can view a task can add comments.
+- Comment owners and project owners can delete comments.
+
+---
+
+## Installation
+
+Clone the repository:
+
+```bash
+git clone https://github.com/AmrElnaggarDev/task_manager.git
+cd task_manager
+```
+
+Install dependencies:
+
+```bash
+composer install
+npm install
+```
+
+Create the environment file:
+
+```bash
+copy .env.example .env
+```
+
+Generate the application key:
+
+```bash
+php artisan key:generate
+```
+
+Configure your database in `.env`, then run migrations:
+
+```bash
+php artisan migrate
+```
+
+Run the development server:
+
+```bash
+php artisan serve
+```
+
+Compile frontend assets:
+
+```bash
+npm run dev
+```
+
+---
+
+## Usage Flow
+
+1. Register or log in.
+2. Create a project.
+3. Add project members by email.
+4. Create tasks inside the project.
+5. Assign tasks to the project owner or project members.
+6. Track task status, priority, and deadline.
+7. Add comments to discuss task updates.
+
+---
+
+## Release History
+
+- `v0.6.0` Dashboard Overview
+- `v0.7.0` Project Members Management
+- `v0.8.0` Task Comments
+- `v0.9.0` Project Team Task Assignment
+- `v1.0.0` First Stable Release
+
+---
+
+## Future Improvements
+
+- Deadline alerts
+- Project statistics
+- Advanced task filters
+- Activity logs
+- User roles inside projects
+- Comment editing
+- Notifications
+- Automated tests
+- API endpoints
+
+---
+
+## Author
+
+Built by [Amr Elnaggar](https://github.com/AmrElnaggarDev)
