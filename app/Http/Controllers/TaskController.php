@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Activity;
 use App\Models\Project;
 use App\Models\Task;
 use Illuminate\Http\Request;
@@ -67,7 +68,9 @@ class TaskController extends Controller
         $attributes['project_id'] = $project->id;
         $attributes['created_by'] = auth()->id();
 
-        $project->tasks()->create($attributes);
+        $task = $project->tasks()->create($attributes);
+
+        Activity::log($project, auth()->user(), 'task_created', "Created Task: {$task->title}");
 
         return redirect()->route('tasks.index', $project)->with('success', 'Task created.');
     }
@@ -125,7 +128,21 @@ class TaskController extends Controller
                 'assigned_to.in' => 'The selected assignee must be the project owner or a project member.',
         ]);
 
+        $oldStatus = $task->getOriginal('status');
+
         $task->update($attributes);
+
+        if ($task->wasChanged('status')) {
+            $fromStatus = str($oldStatus)->replace('_', ' ')->title();
+            $toStatus = str($task->status)->replace('_', ' ')->title();
+
+            Activity::log(
+                $project->id,
+                auth()->user(),
+                'task_status_updated',
+                "changed task \"{$task->title}\" status from {$fromStatus} to {$toStatus}"
+        );}
+
         return redirect()->route('tasks.index', $task->project_id)->with('success', 'Task updated.');
     }
 
@@ -136,6 +153,11 @@ class TaskController extends Controller
     {
         $this->authorize ('delete', $task);
 
+        $project = $task->project;
+        $title = $task->title;
+
         $task->delete();
+
+        Activity::log ($project->id, auth()->user(), 'task_deleted', "Deleted Task: {$title}");
         return redirect()->route('tasks.index', $task->project_id)->with('success', 'Task deleted.');    }
 }

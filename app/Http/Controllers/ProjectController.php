@@ -69,8 +69,13 @@ class ProjectController extends Controller
         $teamMembers = $project->members()->get();
         $owner = $project->owner;
 
+        $activities = $project->activities()
+            ->with('user')
+            ->latest()
+            ->take(10)
+            ->get();
 
-        return view('projects.show', compact('project', 'teamMembers', 'owner'));
+        return view('projects.show', compact('project', 'teamMembers', 'owner', 'activities'));
     }
 
     /**

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Activity;
 use App\Models\Comment;
 use App\Models\Task;
 
@@ -22,6 +23,8 @@ class TaskCommentController extends Controller
             'user_id' => auth()->id()
         ]);
 
+         Activity::log($project, auth()->user(), 'comment_added', "Commented on task {$task->title} ");
+
         return back()->with('success', 'Comment added successfully.');
     }
 
@@ -30,7 +33,13 @@ class TaskCommentController extends Controller
         abort_if($comment->task_id != $task->id, 404);
 
         $this->authorize('delete', $comment);
+
+        $project = $task->project;
+
         $comment->delete();
+
+        Activity::log($project, auth()->user(), 'comment_deleted', "Deleted a comment from {$task->title} ");
+
         return back()->with('success', 'Comment deleted successfully.');
 
     }

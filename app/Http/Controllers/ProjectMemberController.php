@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Activity;
 use App\Models\Project;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -32,6 +33,8 @@ class ProjectMemberController extends Controller
 
         $project->members()->attach($user->id);
 
+        Activity::log($project, auth()->user(), 'member_added', "added {$user->name} to the project");
+
         return back()->with('success', 'Member added successfully.');
     }
 
@@ -46,6 +49,8 @@ class ProjectMemberController extends Controller
         }
 
         $project->members()->detach($user->id);
+
+        Activity::log($project, auth()->user(), 'member_removed', "removed {$user->name} from the project");
 
         return back()->with('success', 'Member removed successfully.');
     }
