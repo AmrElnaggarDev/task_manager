@@ -27,6 +27,11 @@ class Project extends Model
         return $this->hasMany(Task::class, 'project_id');
     }
 
+    public function activities () :HasMany
+    {
+        return $this->hasMany(Activity::class, 'project_id');
+    }
+
     public function getAllPossibleAssigneesAttribute()
     {
         return $this->members->prepend($this->owner);

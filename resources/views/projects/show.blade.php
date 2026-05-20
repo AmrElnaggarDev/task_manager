@@ -31,12 +31,12 @@
 
 
         <div class="row">
+            {{-- العمود الأيمن العريض (تفاصيل المشروع) --}}
             <div class="col-md-7">
                 <div class="card mb-4 shadow-sm">
                     <div class="card-body">
                         <h5 class="card-title">{{ $project->name }}</h5>
                         <p class="card-text">{{ $project->description }}</p>
-
 
                         <h5 class="mt-4">Project Progress</h5>
                         @php
@@ -53,7 +53,7 @@
 
                     </div>
 
-                    <div class="d-flex gap-2 mt-3">
+                    <div class="d-flex gap-2 mt-3 p-3 border-top">
                         <a href="{{ route('projects.index') }}" class="btn btn-secondary">Back to Projects</a>
 
                         @can('update', $project)
@@ -74,11 +74,12 @@
                     </div>
                 </div>
             </div>
+
+            {{-- العمود الأيسر (الأعضاء + سجل الأنشطة) --}}
             <div class="col-md-5">
                 {{-- Team Members --}}
                 <div class="card mb-4 shadow-sm">
                     <div class="card-body">
-
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <div>
                                 <h5 class="card-title mb-1">Team Members</h5>
@@ -120,9 +121,7 @@
 
                         {{-- Members list --}}
                         <div class="row">
-
                             @forelse($teamMembers as $teamMember)
-                                {{-- Member item example --}}
                                 <div class="col-12">
                                     <div class="border rounded p-3 mb-2">
                                         <div class="d-flex justify-content-between align-items-center gap-3">
@@ -158,7 +157,6 @@
                                         </div>
                                     </div>
                                 </div>
-
                             @empty
                                 <div class="col-12">
                                     <div class="text-center text-muted py-4">
@@ -167,13 +165,48 @@
                                     </div>
                                 </div>
                             @endforelse
-
-
-
-
                         </div>
                     </div>
                 </div>
+
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <h5 class="card-title mb-1">Activity Log</h5>
+                                <p class="text-muted small mb-0">
+                                    Recent updates and actions inside this project.
+                                </p>
+                            </div>
+                        </div>
+
+                        @forelse($activities as $activity)
+                            <div class="border-start border-primary ps-3 mb-3">
+                                <div class="d-flex justify-content-between align-items-start gap-3">
+                                    <div>
+                                        <p class="mb-1 small">
+                                            <strong>{{ $activity->user->name ?? 'System' }}</strong>
+                                            {{ $activity->description }}
+                                        </p>
+                                        <span class="text-muted small" style="font-size: 12px;">
+                                            {{ $activity->created_at->diffForHumans() }}
+                                        </span>
+                                    </div>
+                                    <span class="badge bg-light text-dark border">
+                                        {{ $activity->type }}
+                                    </span>
+                                </div>
+                            </div>
+                        @empty
+                            <div class="text-center text-muted py-4">
+                                <i class="bi bi-clock-history fs-2 d-block mb-2"></i>
+                                No activity yet.
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+
+
             </div>
         </div>
     </div>
@@ -201,7 +234,7 @@
                                    id="member_email"
                                    class="form-control"
                                    placeholder="Enter registered user email"
-                            value="{{old('email')}}">
+                                   value="{{old('email')}}">
 
                             <small class="text-muted">
                                 The user must already have an account.
@@ -226,5 +259,4 @@
             </div>
         </div>
     </div>
-
 @endsection

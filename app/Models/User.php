@@ -74,4 +74,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Comment::class, 'user_id');
     }
+
+    public function activities () :HasMany
+    {
+        return $this->hasMany(Activity::class, 'user_id');
+    }
 }
