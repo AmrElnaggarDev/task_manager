@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Activity;
 use App\Models\Project;
 use App\Models\Task;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -13,16 +14,62 @@ class TaskController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Project $project)
+    public function index(Request $request, Project $project)
     {
         $this->authorize('viewAny', [Task::class, $project]);
 
-        $tasks = $project->tasks()
-            ->when(\request('status'), fn($query) => $query->where('status', \request('status')))
-            ->orderBy('status')
-            ->get();
-        $users = $project->members()->get();
-        return view('tasks.index', compact('tasks', 'users', 'project'));
+        $assignees = $project->all_possible_assignees;
+        $allowedAssigneeIds = $project->all_possible_assignees->pluck('id')->toArray();
+
+        $query = $project->tasks()
+            ->with(['assignee', 'creator']);
+
+        $query->when($request->filled('search'), function ($q) use ($request) {
+            $q->where('title', 'like', '%' . $request->search . '%');
+        });
+
+        $query->when($request->filled('status'), function ($q) use ($request) {
+            $q->where('status', $request->status);
+        });
+
+        $query->when($request->filled('priority'), function ($q) use ($request) {
+            $q->where('priority', $request->priority);
+        });
+
+        $query->when($request->filled('assignee'), function ($q) use ($request, $allowedAssigneeIds) {
+            if ($request->assignee == 'unassigned') {
+                $q->whereNull('assigned_to');
+            }else if (in_array($request->assignee, $allowedAssigneeIds)) {
+                $q->where('assigned_to', $request->assignee);
+            }
+        });
+
+
+        $query->when($request->filled('deadline'), function ($q) use ($request) {
+            $today = Carbon::today()->toDateString();
+
+            switch ($request->deadline) {
+                case 'overdue' :
+                    $q->where('deadline', '<', $today)
+                        ->where ('status', '!=', 'done');
+                    break;
+                case 'today' :
+                    $q->whereDate('deadline',$today);
+                    break;
+                case 'upcoming' :
+                    $q->where('deadline', '>', $today)
+                    ->where ('status', '!=', 'done');
+                    break;
+                case 'no_deadline' :
+                    $q->whereNull('deadline');
+                    break;
+            }
+        });
+
+        $tasks = $query->latest()->get();
+        $filters = $request->all();
+
+        return view('tasks.index', compact('tasks', 'assignees', 'project', 'filters'));
     }
 
     /**

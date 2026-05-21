@@ -23,13 +23,94 @@
             </div>
         @endif
 
-        {{-- Filter bar --}}
-        <div class="bg-white shadow-sm rounded p-3 mb-4 d-flex gap-2 flex-wrap">
-            <a href="{{route('tasks.index', $project->id)}}" class="btn btn-sm btn-dark">All</a>
-            <a href="{{route('tasks.index', ['project' => $project->id, 'status' => 'todo'])}}" class="btn btn-sm btn-outline-primary">To Do</a>
-            <a href="{{route('tasks.index', ['project' => $project->id, 'status' => 'in_progress'])}}" class="btn btn-sm btn-outline-warning">In Progress</a>
-            <a href="{{route('tasks.index', ['project' => $project->id, 'status' => 'done'])}}" class="btn btn-sm btn-outline-success">Done</a>
+
+        {{-- Advanced Filters --}}
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body">
+
+                <form action="{{route('tasks.index', $project->id)}}" method="GET">
+                    <div class="row g-3 align-items-end">
+
+                        {{-- Search --}}
+                        <div class="col-md-3">
+                            <label for="search" class="form-label">Search</label>
+                            <input type="text"
+                                   name="search"
+                                   id="search"
+                                   class="form-control"
+                                   placeholder="Search task title..."
+                                   value="{{$filters['search'] ?? ''}}">
+                        </div>
+
+                        {{-- Status --}}
+                        <div class="col-md-2">
+                            <label for="status" class="form-label">Status</label>
+                            <select name="status" id="status" class="form-select">
+                                <option value="">All</option>
+                                <option value="todo" @selected(($filters['status'] ?? '')== 'todo')>To Do</option>
+                                <option value="in_progress" @selected(($filters['status'] ?? '')== 'in_progress')>In Progress</option>
+                                <option value="done" @selected(($filters['status'] ?? '')== 'done')>Done</option>
+                            </select>
+                        </div>
+
+                        {{-- Priority --}}
+                        <div class="col-md-2">
+                            <label for="priority" class="form-label">Priority</label>
+                            <select name="priority" id="priority" class="form-select">
+                                <option value="">All</option>
+                                {{-- OPTIONS: low, medium, high --}}
+                                <option value="low" @selected(($filters['priority'] ?? '')== 'low')>Low</option>
+                                <option value="medium" @selected(($filters['priority'] ?? '')== 'medium')>Medium</option>
+                                <option value="high" @selected(($filters['priority'] ?? '')== 'high')>High</option>
+                            </select>
+                        </div>
+
+                        {{-- Assignee --}}
+                        <div class="col-md-2">
+                            <label for="assignee" class="form-label">Assignee</label>
+                            <select name="assignee" id="assignee" class="form-select">
+                                <option value="">All</option>
+                                <option value="unassigned" @selected(($filters['assignee'] ?? '') == 'unassigned')>
+                                    Unassigned
+                                </option>
+
+                                @foreach($assignees as $assignee)
+                                    <option value="{{$assignee->id}}"  @selected(($filters['assignee'] ?? '') == $assignee->id)>
+                                        {{$assignee->name}}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        {{-- Deadline --}}
+                        <div class="col-md-2">
+                            <label for="deadline" class="form-label">Deadline</label>
+                            <select name="deadline" id="deadline" class="form-select">
+                                <option value="">All</option>
+                                <option value="overdue"  @selected(($filters['deadline'] ?? '') == 'overdue')>Overdue</option>
+                                <option value="today"  @selected(($filters['deadline'] ?? '') == 'today')>Due Today</option>
+                                <option value="upcoming"  @selected(($filters['deadline'] ?? '') == 'upcoming')>Upcoming</option>
+                                <option value="no_deadline"  @selected(($filters['deadline'] ?? '') == 'no_deadline')>No Deadline</option>
+                            </select>
+                        </div>
+
+                        {{-- Buttons --}}
+                        <div class="col-md-1 d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-funnel"></i>
+                            </button>
+
+                            <a href="{{route('tasks.index', $project->id)}}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle"></i>
+                            </a>
+                        </div>
+
+                    </div>
+                </form>
+
+            </div>
         </div>
+
 
         {{-- Empty state --}}
         @if($tasks->isEmpty())
