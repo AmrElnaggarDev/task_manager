@@ -106,6 +106,145 @@
 
         </div>
 
+        {{-- Deadline Alerts --}}
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-0">
+                        <i class="bi bi-alarm me-1"></i>
+                        Deadline Alerts
+                    </h5>
+                    <small class="text-muted">
+                        Tasks that need your attention based on deadlines.
+                    </small>
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="row g-3">
+
+                    {{-- Overdue Tasks --}}
+                    <div class="col-md-4">
+                        <div class="border rounded p-3 h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="mb-0 text-danger">
+                                    <i class="bi bi-exclamation-triangle me-1"></i>
+                                    Overdue
+                                </h6>
+
+                                <span class="badge bg-danger">
+                            {{ $overDueTasks->count() }}
+                        </span>
+                            </div>
+
+                            @forelse($overDueTasks as $task)
+                                <div class="border-bottom pb-2 mb-2">
+                                    <a href="{{ route('tasks.show', $task->id) }}"
+                                       class="fw-semibold text-dark text-decoration-none">
+                                        {{ $task->title }}
+                                    </a>
+
+                                    <div class="small text-muted">
+                                        <i class="bi bi-folder me-1"></i>
+                                        {{ $task->project->name ?? 'No project' }}
+                                    </div>
+
+                                    <div class="small text-danger">
+                                        <i class="bi bi-calendar-x me-1"></i>
+                                        {{-- TODO: format deadline --}}
+                                        {{ \Illuminate\Support\Carbon::parse($task->deadline)->format('M d, Y') }}
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="text-muted small">
+                                    No overdue tasks.
+                                </div>
+                            @endforelse
+                        </div>
+                    </div>
+
+                    {{-- Due Today Tasks --}}
+                    <div class="col-md-4">
+                        <div class="border rounded p-3 h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="mb-0 text-warning">
+                                    <i class="bi bi-calendar-event me-1"></i>
+                                    Due Today
+                                </h6>
+
+                                <span class="badge bg-warning text-dark">
+                            {{ $dueTodayTasks->count() }}
+                        </span>
+                            </div>
+
+                            @forelse($dueTodayTasks as $task)
+                                <div class="border-bottom pb-2 mb-2">
+                                    <a href="{{ route('tasks.show', $task->id) }}"
+                                       class="fw-semibold text-dark text-decoration-none">
+                                        {{ $task->title }}
+                                    </a>
+
+                                    <div class="small text-muted">
+                                        <i class="bi bi-folder me-1"></i>
+                                        {{ $task->project->name ?? 'No project' }}
+                                    </div>
+
+                                    <div class="small text-warning">
+                                        <i class="bi bi-calendar-check me-1"></i>
+                                        Due today
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="text-muted small">
+                                    No tasks due today.
+                                </div>
+                            @endforelse
+                        </div>
+                    </div>
+
+                    {{-- Upcoming Tasks --}}
+                    <div class="col-md-4">
+                        <div class="border rounded p-3 h-100">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="mb-0 text-primary">
+                                    <i class="bi bi-calendar-plus me-1"></i>
+                                    Upcoming
+                                </h6>
+
+                                <span class="badge bg-primary">
+                            {{ $upcomingTasks->count() }}
+                        </span>
+                            </div>
+
+                            @forelse($upcomingTasks as $task)
+                                <div class="border-bottom pb-2 mb-2">
+                                    <a href="{{ route('tasks.show', $task->id) }}"
+                                       class="fw-semibold text-dark text-decoration-none">
+                                        {{ $task->title }}
+                                    </a>
+
+                                    <div class="small text-muted">
+                                        <i class="bi bi-folder me-1"></i>
+                                        {{ $task->project->name ?? 'No project' }}
+                                    </div>
+
+                                    <div class="small text-primary">
+                                        <i class="bi bi-calendar-event me-1"></i>
+                                        {{ \Illuminate\Support\Carbon::parse($task->deadline)->format('M d, Y') }}
+                                    </div>
+                                </div>
+                            @empty
+                                <div class="text-muted small">
+                                    No upcoming deadlines.
+                                </div>
+                            @endforelse
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
         <div class="row">
 
             {{-- Left column: Latest Projects --}}
