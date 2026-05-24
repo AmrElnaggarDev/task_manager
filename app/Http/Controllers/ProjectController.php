@@ -15,15 +15,15 @@ class ProjectController extends Controller
     {
         $this->authorize('viewAny', Project::class);
 
-        $projects = Auth::user()->ownedProjects()->withCount ([
+        $projects = Auth::user()->ownedProjects()->withCount([
             'tasks as to_do_tasks' => function ($query) {
-            $query->where ('status', 'todo');
+                $query->where('status', 'todo');
             },
             'tasks as in_progress' => function ($query) {
-            $query->where ('status', 'in_progress');
+                $query->where('status', 'in_progress');
             },
             'tasks as done' => function ($query) {
-            $query->where ('status', 'done');
+                $query->where('status', 'done');
             }
         ])->get();
         return view('projects.index', compact('projects'));
@@ -36,7 +36,7 @@ class ProjectController extends Controller
     {
         $this->authorize('create', Project::class);
 
-        return view ('projects.create');
+        return view('projects.create');
     }
 
     /**
@@ -75,7 +75,21 @@ class ProjectController extends Controller
             ->take(10)
             ->get();
 
-        return view('projects.show', compact('project', 'teamMembers', 'owner', 'activities'));
+        $totalTasksCount = $project->tasks()->count();
+        $todoTasksCount = $project->tasks()
+            ->where('status', 'todo')
+            ->count();
+        $inProgressTasksCount = $project->tasks()
+            ->where('status', 'in_progress')
+            ->count();
+        $doneTasksCount = $project->tasks()
+            ->where('status', 'done')
+            ->count();
+        $completionPercentage = $totalTasksCount > 0 ? round($doneTasksCount / $totalTasksCount * 100) : 0;
+
+        return view('projects.show',
+            compact('project', 'teamMembers', 'owner', 'activities', 'totalTasksCount', 'todoTasksCount',
+                'inProgressTasksCount', 'doneTasksCount', 'completionPercentage'));
     }
 
     /**

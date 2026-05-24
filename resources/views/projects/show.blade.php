@@ -29,28 +29,13 @@
             </div>
         @endif
 
-
         <div class="row">
-            {{-- العمود الأيمن العريض (تفاصيل المشروع) --}}
             <div class="col-md-7">
+
                 <div class="card mb-4 shadow-sm">
                     <div class="card-body">
                         <h5 class="card-title">{{ $project->name }}</h5>
                         <p class="card-text">{{ $project->description }}</p>
-
-                        <h5 class="mt-4">Project Progress</h5>
-                        @php
-                            $tasks = $project->tasks;
-                            $totalTasks = $tasks->count();
-                            $completedTasks = $tasks->where('status', 'done')->count();
-                            $progress = $totalTasks > 0 ? ($completedTasks / $totalTasks) * 100 : 0;
-                        @endphp
-                        <div class="progress mb-4">
-                            <div class="progress-bar" role="progressbar" style="width: {{ $progress }}%;"
-                                 aria-valuenow="{{ $progress }}" aria-valuemin="0" aria-valuemax="100">
-                                {{ round($progress) }}%</div>
-                        </div>
-
                     </div>
 
                     <div class="d-flex gap-2 mt-3 p-3 border-top">
@@ -73,9 +58,86 @@
                         @endcan
                     </div>
                 </div>
+
+                <div class="card mb-4 shadow-sm border-0">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <h5 class="card-title mb-1">
+                                    <i class="bi bi-bar-chart-line me-1"></i>
+                                    Project Statistics
+                                </h5>
+                                <p class="text-muted small mb-0">
+                                    Quick overview of task progress in this project.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            {{-- Total Tasks --}}
+                            <div class="col-md-3 col-6">
+                                <div class="border rounded p-3 h-100 bg-white">
+                                    <small class="text-muted d-block mb-1">Total Tasks</small>
+                                    <h4 class="fw-bold mb-0">
+                                        {{ $totalTasksCount }}
+                                    </h4>
+                                </div>
+                            </div>
+
+                            {{-- To Do --}}
+                            <div class="col-md-3 col-6">
+                                <div class="border rounded p-3 h-100 bg-white">
+                                    <small class="text-muted d-block mb-1">To Do</small>
+                                    <h4 class="fw-bold mb-0 text-secondary">
+                                        {{ $todoTasksCount }}
+                                    </h4>
+                                </div>
+                            </div>
+
+                            {{-- In Progress --}}
+                            <div class="col-md-3 col-6">
+                                <div class="border rounded p-3 h-100 bg-white">
+                                    <small class="text-muted d-block mb-1">In Progress</small>
+                                    <h4 class="fw-bold mb-0 text-warning">
+                                        {{ $inProgressTasksCount }}
+                                    </h4>
+                                </div>
+                            </div>
+
+                            {{-- Done --}}
+                            <div class="col-md-3 col-6">
+                                <div class="border rounded p-3 h-100 bg-white">
+                                    <small class="text-muted d-block mb-1">Done</small>
+                                    <h4 class="fw-bold mb-0 text-success">
+                                        {{ $doneTasksCount }}
+                                    </h4>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="small text-muted">Completion</span>
+                                <span class="small fw-semibold">
+                                    {{ $completionPercentage }}%
+                                </span>
+                            </div>
+
+                            <div class="progress" style="height: 10px;">
+                                <div class="progress-bar bg-success"
+                                     role="progressbar"
+                                     style="width: {{ round($completionPercentage) }}%;"
+                                     aria-valuenow="{{ round($completionPercentage) }}"
+                                     aria-valuemin="0"
+                                     aria-valuemax="100">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
-            {{-- العمود الأيسر (الأعضاء + سجل الأنشطة) --}}
             <div class="col-md-5">
                 {{-- Team Members --}}
                 <div class="card mb-4 shadow-sm">
@@ -169,6 +231,7 @@
                     </div>
                 </div>
 
+                {{-- Activity Log --}}
                 <div class="card mb-4 shadow-sm">
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -205,7 +268,6 @@
                         @endforelse
                     </div>
                 </div>
-
 
             </div>
         </div>
