@@ -29,4 +29,47 @@ class Activity extends Model
             'description' => $description,
         ]);
     }
+
+
+    public function getTypeLabel(): string
+    {
+        return match ($this->type) {
+            'task_created'        => 'Task Created',
+            'task_status_updated' => 'Status Updated',
+            'member_added'        => 'Member Added',
+            'task_deleted'        => 'Task Deleted',
+            'member_removed'      => 'Member Removed',
+            'comment_added'       => 'Comment Added',
+            'comment_deleted'      => 'Comment Deleted',
+            default               => ucfirst(str_replace('_', ' ', $this->type)),
+        };
+    }
+
+    public function getTypeIcon(): string
+    {
+        return match ($this->type) {
+            'task_created'        => 'bi-plus-circle',
+            'task_status_updated' => 'bi-arrow-repeat',
+            'task_deleted'        => 'bi-trash',
+            'member_added'        => 'bi-person-plus',
+            'member_removed'      => 'bi-person-dash',
+            'comment_added'       => 'bi-chat-left-text',
+            'comment_deleted'     => 'bi-chat-left-x',
+            default               => 'bi-info-circle',
+        };
+    }
+
+    public function getTypeBadgeClass(): string
+    {
+        return match ($this->type) {
+            'task_created'        => 'bg-primary',
+            'task_status_updated' => 'bg-warning text-dark',
+            'task_deleted'        => 'bg-danger',
+            'member_added'        => 'bg-success',
+            'member_removed'      => 'bg-danger',
+            'comment_added'       => 'bg-info text-dark',
+            'comment_deleted'     => 'bg-secondary',
+            default               => 'bg-dark',
+        };
+    }
 }

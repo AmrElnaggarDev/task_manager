@@ -232,11 +232,15 @@
                 </div>
 
                 {{-- Activity Log --}}
-                <div class="card mb-4 shadow-sm">
+                <div class="card mb-4 shadow-sm border-0">
                     <div class="card-body">
+
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <div>
-                                <h5 class="card-title mb-1">Activity Log</h5>
+                                <h5 class="card-title mb-1">
+                                    <i class="bi bi-clock-history me-1"></i>
+                                    Activity Log
+                                </h5>
                                 <p class="text-muted small mb-0">
                                     Recent updates and actions inside this project.
                                 </p>
@@ -244,20 +248,33 @@
                         </div>
 
                         @forelse($activities as $activity)
-                            <div class="border-start border-primary ps-3 mb-3">
-                                <div class="d-flex justify-content-between align-items-start gap-3">
-                                    <div>
-                                        <p class="mb-1 small">
-                                            <strong>{{ $activity->user->name ?? 'System' }}</strong>
-                                            {{ $activity->description }}
-                                        </p>
-                                        <span class="text-muted small" style="font-size: 12px;">
-                                            {{ $activity->created_at->diffForHumans() }}
-                                        </span>
+                            <div class="border rounded p-3 mb-3">
+                                <div class="d-flex align-items-start gap-3">
+
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 bg-light"
+                                         style="width: 38px; height: 38px;">
+                                        <i class="bi {{ $activity->getTypeIcon() }} fs-5 text-secondary"></i>
                                     </div>
-                                    <span class="badge bg-light text-dark border">
-                                        {{ $activity->type }}
-                                    </span>
+
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between align-items-start gap-2 mb-1">
+                                            <div>
+                                                <p class="mb-1 small">
+                                                    <strong>
+                                                        {{ $activity->user?->name ?? 'System' }}
+                                                    </strong>
+                                                    {{ $activity->description }}
+                                                </p>
+                                                <span class="text-muted small">
+                                    {{ $activity->created_at->diffForHumans() }}
+                                </span>
+                                            </div>
+
+                                            <span class="badge {{ $activity->getTypeBadgeClass() }}">
+                                {{ $activity->getTypeLabel() }}
+                            </span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         @empty
@@ -266,6 +283,7 @@
                                 No activity yet.
                             </div>
                         @endforelse
+
                     </div>
                 </div>
 
