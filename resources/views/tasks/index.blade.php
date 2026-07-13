@@ -66,7 +66,7 @@
                         </div>
 
                         {{-- Assignee --}}
-                        <div class="col-md-2">
+                        <div class="col-md-3">
                             <label for="assignee" class="form-label">Assignee</label>
                             <select name="assignee" id="assignee" class="form-select">
                                 <option value="">All</option>
@@ -94,13 +94,35 @@
                             </select>
                         </div>
 
+
+                        {{-- Sort Dropdown  --}}
+                        <div class="col-md-4 mt-3">
+                            <label for="sort" class="form-label">Sort Order</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light text-muted border-end-0">
+                                    <i class="bi bi-sort-down"></i>
+                                </span>
+                                <select name="sort" id="sort" class="form-select border-start-0" onchange="this.form.submit()">
+                                    <option value="" @selected(empty($filters['sort'] ?? ''))>Default (Newest First)</option>
+                                    <option value="newest" @selected(($filters['sort'] ?? '') == 'newest')>Newest Tasks</option>
+                                    <option value="oldest" @selected(($filters['sort'] ?? '') == 'oldest')>Oldest Tasks</option>
+                                    <option value="deadline" @selected(($filters['sort'] ?? '') == 'deadline')>Deadline (Closest First)</option>
+                                    <option value="deadline_desc" @selected(($filters['sort'] ?? '') == 'deadline_desc')>Deadline (Furthest First)</option>
+                                    <option value="priority" @selected(($filters['sort'] ?? '') == 'priority')>Priority</option>
+                                    <option value="status" @selected(($filters['sort'] ?? '') == 'status')>Status</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 d-none d-md-block"></div>
+
                         {{-- Buttons --}}
-                        <div class="col-md-1 d-flex gap-2">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-funnel"></i>
+                        <div class="col-md-2 mt-3 d-flex justify-content-end gap-2">
+                            <button type="submit" class="btn btn-primary w-50">
+                                <i class="bi bi-funnel me-1"></i> Filter
                             </button>
 
-                            <a href="{{route('tasks.index', $project->id)}}" class="btn btn-outline-secondary">
+                            <a href="{{route('tasks.index', $project->id)}}" class="btn btn-outline-secondary w-50" title="Reset Filters">
                                 <i class="bi bi-x-circle"></i>
                             </a>
                         </div>
@@ -114,7 +136,7 @@
 
         {{-- Empty state --}}
         @if($tasks->isEmpty())
-            <div class="text-center py-5 bg-white rounded shadow-sm">
+            <div class="text-center py-5 bg-white rounded shadow-sm mb-4">
                 <i class="bi bi-clipboard2 fs-1 text-muted"></i>
                 <p class="text-muted mt-3">No tasks yet.</p>
             </div>
@@ -158,33 +180,33 @@
                             </td>
                             <td>
                                 @php
-                                $priorityClass = match ($task->priority){
-                                     'high'   => 'bg-danger',
-                                        'medium' => 'bg-warning',
-                                        'low'    => 'bg-success',
-                                        default  => 'bg-secondary',
-                                };
+                                    $priorityClass = match ($task->priority){
+                                         'high'   => 'bg-danger',
+                                            'medium' => 'bg-warning',
+                                            'low'    => 'bg-success',
+                                            default  => 'bg-secondary',
+                                    };
                                 @endphp
                                 <span class="badge {{$priorityClass}}">{{$task->priority}}</span>
                             </td>
                             <td>
                                 {{-- STATUS BADGE --}}
                                 @php
-                                $statusClass = match ($task->status) {
-                                    'todo'        => 'bg-secondary',
-                                        'in_progress' => 'bg-warning',
-                                        'done'        => 'bg-success',
-                                        default       => 'bg-secondary',
-                                };
+                                    $statusClass = match ($task->status) {
+                                        'todo'        => 'bg-secondary',
+                                            'in_progress' => 'bg-warning',
+                                            'done'        => 'bg-success',
+                                            default       => 'bg-secondary',
+                                    };
 
-                                $statusLabel = match ($task->status) {
-                                    'todo' => 'To Do',
-                                    'in_progress' => 'In Progress',
-                                    'done' => 'Done',
-                                    default => $task->status,
-                                };
+                                    $statusLabel = match ($task->status) {
+                                        'todo' => 'To Do',
+                                        'in_progress' => 'In Progress',
+                                        'done' => 'Done',
+                                        default => $task->status,
+                                    };
 
-                                    @endphp
+                                @endphp
                                 <span class="badge {{$statusClass}}">{{$statusLabel}}</span>
                             </td>
                             <td>

@@ -66,7 +66,33 @@ class TaskController extends Controller
             }
         });
 
-        $tasks = $query->latest()->get();
+        $sort = $request->query('sort');
+
+        $allowedSorts = [
+            'newest'        => ['type' => 'normal', 'column' => 'created_at', 'direction' => 'desc'],
+            'oldest'        => ['type' => 'normal', 'column' => 'created_at', 'direction' => 'asc'],
+            'deadline'      => ['type' => 'raw',    'sql' => 'ISNULL(deadline) ASC, deadline ASC'],
+            'deadline_desc' => ['type' => 'normal', 'column' => 'deadline',   'direction' => 'desc'],
+            'priority'      => ['type' => 'raw',    'sql' => "FIELD(priority, 'high', 'medium', 'low') ASC"],
+            'status'        => ['type' => 'normal', 'column' => 'status',     'direction' => 'asc'],
+        ];
+
+        $query->when($request->filled('sort') && array_key_exists($sort, $allowedSorts),
+            function ($q) use ($sort, $allowedSorts) {
+                $sortConfig = $allowedSorts[$sort];
+
+                if ($sortConfig['type'] === 'raw') {
+                    return $q->orderByRaw($sortConfig['sql']);
+                }
+
+                return $q->orderBy($sortConfig['column'], $sortConfig['direction']);
+            },
+            function ($q) {
+                return $q->latest();
+            }
+        );
+
+        $tasks = $query->get();
         $filters = $request->all();
 
         return view('tasks.index', compact('tasks', 'assignees', 'project', 'filters'));
