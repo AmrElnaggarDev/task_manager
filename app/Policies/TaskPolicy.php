@@ -65,4 +65,14 @@ class TaskPolicy
     {
         return false;
     }
+    public function updateStatus(User $user, Task $task): bool
+    {
+        $project = $task->project;
+        $canAccessProject = $user->id === $project->owner_id
+            || $project->members()->where ('user_id', $user->id)->exists();
+        $canUpdateStatus = $user->id === $task->created_by
+            || $user->id === $task->assigned_to;
+
+        return $canAccessProject && $canUpdateStatus;
+    }
 }
