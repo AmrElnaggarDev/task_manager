@@ -219,6 +219,33 @@ class TaskController extends Controller
         return redirect()->route('tasks.index', $task->project_id)->with('success', 'Task updated.');
     }
 
+    public function updateStatus (Request $request, Task $task)
+    {
+        $this->authorize ('updateStatus', $task);
+        $attributes = $request->validate([
+            'status' => 'required|string|in:todo,in_progress,done',
+        ]);
+
+        $oldStatus = $task->status;
+
+        $task->update([
+            'status' => $attributes['status'],
+        ]);
+
+        if ($task->wasChanged('status')) {
+            $fromStatus = str($oldStatus)->replace('_', ' ')->title();
+            $toStatus = str($task->status)->replace('_', ' ')->title();
+
+            Activity::log(
+                $task->project_id,
+                auth()->user(),
+                'task_status_updated',
+                "changed task \"{$task->title}\" status from {$fromStatus} to {$toStatus}"
+            );
+        }
+        return back()->with('success', 'Task Status updated.');
+    }
+
     /**
      * Remove the specified resource from storage.
      */

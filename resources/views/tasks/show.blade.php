@@ -16,14 +16,14 @@
                 @endcan
 
                 @can('delete', $task)
-                        <form action="{{route('tasks.destroy', $task->id)}}" method="POST" class="d-inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this task?')">
-                                <i class="bi bi-trash"></i> Delete
-                            </button>
-                        </form>
-                    @endcan
+                    <form action="{{route('tasks.destroy', $task->id)}}" method="POST" class="d-inline">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('Delete this task?')">
+                            <i class="bi bi-trash"></i> Delete
+                        </button>
+                    </form>
+                @endcan
             </div>
         </div>
 
@@ -54,17 +54,17 @@
                                 <td>
                                     @php
                                         $statusClass = match ($task->status) {
-                                            'todo'        => 'bg-secondary',
-                                                'in_progress' => 'bg-warning',
-                                                'done'        => 'bg-success',
-                                                default       => 'bg-secondary',
+                                        'todo' => 'bg-secondary',
+                                        'in_progress' => 'bg-warning',
+                                        'done' => 'bg-success',
+                                        default => 'bg-secondary',
                                         };
 
                                         $statusLabel = match ($task->status) {
-                                            'todo' => 'To Do',
-                                            'in_progress' => 'In Progress',
-                                            'done' => 'Done',
-                                            default => $task->status,
+                                        'todo' => 'To Do',
+                                        'in_progress' => 'In Progress',
+                                        'done' => 'Done',
+                                        default => $task->status,
                                         };
 
                                     @endphp
@@ -77,10 +77,10 @@
                                 <td>
                                     @php
                                         $priorityClass = match ($task->priority){
-                                             'high'   => 'bg-danger',
-                                                'medium' => 'bg-warning',
-                                                'low'    => 'bg-success',
-                                                default  => 'bg-secondary',
+                                        'high' => 'bg-danger',
+                                        'medium' => 'bg-warning',
+                                        'low' => 'bg-success',
+                                        default => 'bg-secondary',
                                         };
                                     @endphp
                                     <span class="badge {{$priorityClass}}">{{$task->priority}}</span>
@@ -95,9 +95,9 @@
                                             $isOverdue = \Carbon\Carbon::parse($task->deadline)->isPast() && $task->status !== 'done';
                                         @endphp
                                         <span class="small {{ $isOverdue ? 'text-danger fw-bold' : 'text-muted' }}">
-                                        <i class="bi bi-calendar{{ $isOverdue ? '-x' : '' }} me-1"></i>
-                                        {{ \Carbon\Carbon::parse($task->deadline)->format('M d, Y') }}
-                                    </span>
+<i class="bi bi-calendar{{ $isOverdue ? '-x' : '' }} me-1"></i>
+{{ \Carbon\Carbon::parse($task->deadline)->format('M d, Y') }}
+</span>
                                     @else
                                         <span class="text-muted small">—</span>
                                     @endif
@@ -138,7 +138,6 @@
                                 </td>
                             </tr>
 
-
                             <tr>
                                 <td class="text-muted small">Project</td>
                                 <td>
@@ -151,8 +150,60 @@
                     </div>
                 </div>
 
-            </div>
+                {{-- Task Status Update (تم نقله هنا داخل الـ col-md-4) --}}
+                @can('updateStatus', $task)
+                    <div class="card shadow-sm border-0 mb-4">
+                        <div class="card-body">
 
+                            <h5 class="card-title mb-1">
+                                <i class="bi bi-arrow-repeat me-1"></i>
+                                Update Status
+                            </h5>
+
+                            <p class="text-muted small">
+                                Change the current progress state of this task.
+                            </p>
+
+                            <form
+                                action="{{ route('tasks.status.update', $task) }}"
+                                method="POST"
+                            >
+                                @csrf
+                                @method('PATCH')
+
+                                <div class="mb-3">
+                                    <label for="status" class="form-label">
+                                        Status
+                                    </label>
+
+                                    <select
+                                        name="status"
+                                        id="status"
+                                        class="form-select @error('status') is-invalid @enderror"
+                                    >
+                                        <option value="todo" {{ old('status', $task->status) === 'todo' ? 'selected' : '' }}>To Do</option>
+                                        <option value="in_progress" {{ old('status', $task->status) === 'in_progress' ? 'selected' : '' }}>In Progress</option>
+                                        <option value="done" {{ old('status', $task->status) === 'done' ? 'selected' : '' }}>Done</option>
+                                    </select>
+
+                                    @error('status')
+                                    <div class="invalid-feedback">
+                                        {{ $message }}
+                                    </div>
+                                    @enderror
+                                </div>
+
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-check-circle me-1"></i>
+                                    Update Status
+                                </button>
+                            </form>
+
+                        </div>
+                    </div>
+                @endcan
+
+            </div>
 
         </div>
 
@@ -214,13 +265,13 @@
 
                                             <div>
                                                 <div class="d-flex align-items-center gap-2 mb-1">
-                                        <span class="fw-semibold small">
-                                            {{ $comment->user->name }}
-                                        </span>
+<span class="fw-semibold small">
+{{ $comment->user->name }}
+</span>
 
                                                     <span class="text-muted small">
-                                            {{ $comment->created_at->diffForHumans() }}
-                                        </span>
+{{ $comment->created_at->diffForHumans() }}
+</span>
                                                 </div>
 
                                                 <p class="mb-0 text-muted" style="line-height: 1.7;">
@@ -253,14 +304,12 @@
 
                             @endforelse
 
-
                         </div>
 
                     </div>
                 </div>
             </div>
         </div>
-
 
         <a href="{{route('tasks.index', $project->id)}}" class="text-muted small">
             <i class="bi bi-arrow-left me-1"></i> Back to Tasks
