@@ -1,6 +1,6 @@
 @php
     use Illuminate\Support\Carbon;
-    use Illuminate\Support\Str
+    use Illuminate\Support\Str;
 @endphp
 @extends('layouts.app')
 
@@ -245,6 +245,158 @@
             </div>
         </div>
 
+        {{-- My Assigned Tasks --}}
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-0">
+                        <i class="bi bi-person-check me-1"></i>
+                        My Assigned Tasks
+                    </h5>
+
+                    <small class="text-muted">
+                        Tasks currently assigned to you.
+                    </small>
+                </div>
+
+                <span class="badge bg-primary">
+                    {{ $assignedTasksCount }}
+        </span>
+            </div>
+
+            <div class="card-body">
+
+                <div class="row g-3 mb-4">
+
+                    <div class="col-md-3 col-6">
+                        <div class="border rounded p-3 h-100">
+                            <small class="text-muted d-block mb-1">
+                                Total Assigned
+                            </small>
+
+                            <h4 class="fw-bold mb-0">
+                                {{ $assignedTasksCount }}
+                            </h4>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 col-6">
+                        <div class="border rounded p-3 h-100">
+                            <small class="text-muted d-block mb-1">
+                                To Do
+                            </small>
+
+                            <h4 class="fw-bold mb-0 text-secondary">
+                                {{ $assignedTodoTasksCount }}
+                            </h4>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 col-6">
+                        <div class="border rounded p-3 h-100">
+                            <small class="text-muted d-block mb-1">
+                                In Progress
+                            </small>
+
+                            <h4 class="fw-bold mb-0 text-warning">
+                                {{ $assignedInProgressTasksCount }}
+                            </h4>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 col-6">
+                        <div class="border rounded p-3 h-100">
+                            <small class="text-muted d-block mb-1">
+                                Done
+                            </small>
+
+                            <h4 class="fw-bold mb-0 text-success">
+                                {{ $assignedDoneTasksCount }}
+                            </h4>
+                        </div>
+                    </div>
+
+                </div>
+
+                <h6 class="mb-3">
+                    Recent Assigned Tasks
+                </h6>
+
+                @forelse($latestAssignedTasks as $assignedTask)
+
+                    <div class="border rounded p-3 mb-3">
+                        <div class="d-flex justify-content-between align-items-start gap-3">
+
+                            <div class="flex-grow-1">
+
+                                <h6 class="mb-1">
+                                    <a href="{{ route('tasks.show', $assignedTask) }}" class="text-decoration-none text-dark fw-bold">
+                                        {{ $assignedTask->title }}
+                                    </a>
+                                </h6>
+
+                                <!-- Project Name -->
+                                <div class="small text-muted mb-2">
+                                    <i class="bi bi-folder me-1"></i>
+                                    {{ $assignedTask->project?->name ?? 'No Project' }}
+                                </div>
+
+                                <!-- Badges -->
+                                <div class="d-flex flex-wrap gap-2">
+
+                                    @php
+                                        $statusClass = match ($assignedTask->status) {
+                                            'todo'        => 'bg-secondary',
+                                            'in_progress' => 'bg-warning text-dark',
+                                            'done'        => 'bg-success',
+                                            default       => 'bg-secondary',
+                                        };
+
+                                        $statusLabel = match ($assignedTask->status) {
+                                            'todo'        => 'To Do',
+                                            'in_progress' => 'In Progress',
+                                            'done'        => 'Done',
+                                            default       => ucfirst($assignedTask->status),
+                                        };
+
+                                        $priorityClass = match ($assignedTask->priority) {
+                                            'high'   => 'bg-danger',
+                                            'medium' => 'bg-warning',
+                                            'low'    => 'bg-success',
+                                            default  => 'bg-secondary',
+                                        };
+                                    @endphp
+
+                                    <span class="badge {{ $statusClass }}">{{ $statusLabel }}</span>
+                                    <span class="badge {{ $priorityClass }}">{{ ucfirst($assignedTask->priority) }}</span>
+
+                                    @if($assignedTask->deadline)
+                                        <span class="badge bg-light text-dark border">
+                        <i class="bi bi-calendar-event me-1"></i>
+                        {{ \Carbon\Carbon::parse($assignedTask->deadline)->format('M d, Y') }}
+                    </span>
+                                    @endif
+
+                                </div>
+                            </div>
+
+                            <!-- Time Created -->
+                            <span class="small text-muted text-nowrap">
+            {{ $assignedTask->created_at?->diffForHumans() ?? 'No DateTime' }}
+        </span>
+
+                        </div>
+                    </div>
+
+                @empty
+                    <div class="text-center text-muted py-4">
+                        <i class="bi bi-person-check fs-2 d-block mb-2"></i>
+                        No tasks are currently assigned to you.
+                    </div>
+                @endforelse
+            </div>
+        </div>
+
         <div class="row">
 
             {{-- Left column: Latest Projects --}}
@@ -261,7 +413,6 @@
 
                     <div class="card-body p-0">
 
-                        {{-- LOOP LATEST PROJECTS HERE --}}
                         @forelse($latestProjects as $project)
                             {{-- Project item example --}}
                             <div class="p-3 border-bottom">

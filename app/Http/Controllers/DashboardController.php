@@ -60,8 +60,26 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
+        $assignedTasksQuery = $user->assignedTasks()
+            ->whereHas('project', function ($q) use ($user) {
+                $q->where ('owner_id', $user->id)
+                    ->orWhereHas ('members', function ($membersQuery) use ($user) {
+                        $membersQuery->where ('users.id', $user->id);
+                    });
+            });
+
+        $assignedTasksCount = (clone $assignedTasksQuery)->count();
+        $assignedTodoTasksCount = (clone $assignedTasksQuery)->where('status', 'todo')->count();
+        $assignedInProgressTasksCount = (clone $assignedTasksQuery)->where('status', 'in_progress')->count();
+        $assignedDoneTasksCount = (clone $assignedTasksQuery)->where('status', 'done')->count();
+
+        $latestAssignedTasks = (clone $assignedTasksQuery)->with('project')->latest()->take(5)->get();
+
         return view('dashboard', compact('user', 'projectsCount', 'tasksCount', 'todoTasksCount',
-              'inProgressTasksCount', 'doneTasksCount', 'latestProjects', 'latestTasks', 'overDueTasks', 'dueTodayTasks', 'upcomingTasks'));
+            'inProgressTasksCount', 'doneTasksCount', 'latestProjects', 'latestTasks', 'overDueTasks', 'dueTodayTasks',
+            'upcomingTasks',
+            'assignedTasksCount', 'assignedTodoTasksCount', 'assignedInProgressTasksCount', 'assignedDoneTasksCount',
+            'latestAssignedTasks'));
 
 
     }
