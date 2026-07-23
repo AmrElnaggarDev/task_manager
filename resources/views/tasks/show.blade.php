@@ -1,4 +1,7 @@
-@php use Illuminate\Support\Str; @endphp
+@php
+    use App\Models\TaskAttachment;
+    use Illuminate\Support\Str;
+@endphp
 @extends('layouts.app')
 @section('title')
     {{$project->name}}
@@ -12,7 +15,8 @@
             <h2 class="mb-0">{{$task->title}}</h2>
             <div class="d-flex gap-2">
                 @can('update', $task)
-                    <a href="{{route('tasks.edit', $task->id)}}" class="btn btn-warning"><i class="bi bi-pencil-square"></i> Edit</a>
+                    <a href="{{route('tasks.edit', $task->id)}}" class="btn btn-warning"><i
+                            class="bi bi-pencil-square"></i> Edit</a>
                 @endcan
 
                 @can('delete', $task)
@@ -41,6 +45,136 @@
                         @endif
                     </div>
                 </div>
+
+                {{-- Task Attachments --}}
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-body">
+
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <h5 class="card-title mb-1">
+                                    <i class="bi bi-paperclip me-1"></i>
+                                    Attachments
+                                </h5>
+
+                                <p class="text-muted small mb-0">
+                                    Files shared with this task.
+                                </p>
+                            </div>
+
+                            <span class="badge bg-secondary">
+                                {{$attachments->count()}}
+                            </span>
+                        </div>
+
+                        @can('create', [TaskAttachment::class, $task])
+                            <form
+                                action="{{route('tasks.attachments.store', $task->id)}}"
+                                method="POST"
+                                enctype="multipart/form-data"
+                                class="mb-4"
+                            >
+                                @csrf
+
+                                <div class="input-group">
+                                    <input
+                                        type="file"
+                                        name="attachment"
+                                        class="form-control @error('attachment') is-invalid @enderror"
+                                        accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.txt,.zip"
+                                    >
+
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-upload me-1"></i>
+                                        Upload
+                                    </button>
+                                </div>
+
+                                @error('attachment')
+                                <div class="text-danger small mt-1">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+
+                                <div class="form-text">
+                                    Maximum size: 5 MB.
+                                </div>
+                            </form>
+                        @endcan
+
+                        <div class="list-group list-group-flush border-top pt-2">
+                            @forelse($attachments as $attachment)
+                                <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
+                                    <div class="d-flex align-items-center overflow-hidden me-3">
+                                        <i class="bi bi-file-earmark-text fs-3 text-primary me-3"></i>
+
+                                        <div class="text-truncate">
+                                            <a href="{{route('attachments.download', $attachment)}}"
+                                               class="fw-bold text-decoration-none text-dark d-block text-truncate"
+                                               title="{{ $attachment->original_name }}" >
+                                                {{ $attachment->original_name }}
+                                            </a>
+
+                                            <small class="text-muted d-block" style="font-size: 0.8rem;">
+                                                <i class="bi bi-person me-1"></i> {{ $attachment->uploader->name ?? 'Unknown' }}
+
+                                                <span class="mx-1">•</span>
+
+                                                <i class="bi bi-clock me-1"></i>{{ $attachment->created_at->diffForHumans() }}
+
+                                                <span class="mx-1">•</span>
+
+
+                                                <i class="bi bi-hdd me-1"></i>
+                                                @if($attachment->size >= 1048576)
+                                                    {{ number_format($attachment->size / 1048576, 2) }} MB
+                                                @else
+                                                    {{ number_format($attachment->size / 1024, 1) }} KB
+                                                @endif
+                                            </small>
+                                        </div>
+                                    </div>
+
+                                    <!-- Action Buttons -->
+                                    <div class="d-flex align-items-center gap-2">
+                                        <a href="{{ route('attachments.download', $attachment) }}"
+                                           class="btn btn-sm btn-light border"
+                                           title="Download File">
+                                            <i class="bi bi-download"></i>
+                                        </a>
+
+                                        <!-- 6. Delete Form & Button -->
+                                    @can('delete', $attachment)
+                                        <form action="{{ route('attachments.destroy', $attachment) }}"
+                                              method="POST"
+                                              class="d-inline">
+                                            @csrf
+                                            @method('DELETE')
+
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-outline-danger"
+                                                    onclick="return confirm('Are you sure you want to delete this file?')"
+                                                    title="Delete File">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                        @endcan
+                                    </div>
+
+                                </div>
+
+                            @empty
+                                <p class="text-muted text-center my-3 small">
+                                    No attachments uploaded yet.
+                                </p>
+
+                                @endforelse
+                        </div>
+
+                    </div>
+                </div>
+
+
             </div>
 
             {{-- Right column: meta info --}}
@@ -109,8 +243,9 @@
                                 <td>
                                     @if($task->assignee)
                                         <div class="d-flex align-items-center gap-2">
-                                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
-                                                 style="width:30px;height:30px;font-size:12px;flex-shrink:0;">
+                                            <div
+                                                class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
+                                                style="width:30px;height:30px;font-size:12px;flex-shrink:0;">
                                                 {{ strtoupper(substr($task->assignee->name, 0, 1)) }}
                                             </div>
                                             <span class="small">{{ $task->assignee->name }}</span>
@@ -126,8 +261,9 @@
                                 <td>
                                     @if($task->creator)
                                         <div class="d-flex align-items-center gap-2">
-                                            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
-                                                 style="width:30px;height:30px;font-size:12px;flex-shrink:0;">
+                                            <div
+                                                class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
+                                                style="width:30px;height:30px;font-size:12px;flex-shrink:0;">
                                                 {{ strtoupper(substr($task->creator->name, 0, 1)) }}
                                             </div>
                                             <span class="small">{{ $task->creator->name }}</span>
@@ -181,9 +317,18 @@
                                         id="status"
                                         class="form-select @error('status') is-invalid @enderror"
                                     >
-                                        <option value="todo" {{ old('status', $task->status) === 'todo' ? 'selected' : '' }}>To Do</option>
-                                        <option value="in_progress" {{ old('status', $task->status) === 'in_progress' ? 'selected' : '' }}>In Progress</option>
-                                        <option value="done" {{ old('status', $task->status) === 'done' ? 'selected' : '' }}>Done</option>
+                                        <option
+                                            value="todo" {{ old('status', $task->status) === 'todo' ? 'selected' : '' }}>
+                                            To Do
+                                        </option>
+                                        <option
+                                            value="in_progress" {{ old('status', $task->status) === 'in_progress' ? 'selected' : '' }}>
+                                            In Progress
+                                        </option>
+                                        <option
+                                            value="done" {{ old('status', $task->status) === 'done' ? 'selected' : '' }}>
+                                            Done
+                                        </option>
                                     </select>
 
                                     @error('status')
@@ -258,8 +403,9 @@
                                     <div class="d-flex justify-content-between align-items-start gap-3">
 
                                         <div class="d-flex gap-2">
-                                            <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center"
-                                                 style="width:35px;height:35px;font-size:13px;flex-shrink:0;">
+                                            <div
+                                                class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center"
+                                                style="width:35px;height:35px;font-size:13px;flex-shrink:0;">
                                                 {{ Str::substr(strtoupper($comment->user->name), 0, 1) }}
                                             </div>
 
@@ -281,7 +427,8 @@
                                         </div>
 
                                         @can('delete', $comment)
-                                            <form action="{{route('tasks.comments.destroy', [$task, $comment])}}" method="POST" class="m-0">
+                                            <form action="{{route('tasks.comments.destroy', [$task, $comment])}}"
+                                                  method="POST" class="m-0">
                                                 @csrf
                                                 @method('DELETE')
 

@@ -160,7 +160,13 @@ class TaskController extends Controller
         $users = $project->members()->get();
 
         $comments = $task->comments()->with('user')->oldest()->get();
-        return view('tasks.show', compact('task', 'project', 'users', 'comments'));
+
+        $attachments = $task->attachments()
+            ->with('uploader')
+            ->latest()
+            ->get();
+
+        return view('tasks.show', compact('task', 'project', 'users', 'comments', 'attachments'));
     }
 
     /**
