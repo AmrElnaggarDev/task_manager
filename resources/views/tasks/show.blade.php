@@ -46,6 +46,156 @@
                     </div>
                 </div>
 
+                {{-- Task Checklist --}}
+                <div class="card shadow-sm border-0 mb-4">
+                    <div class="card-body">
+
+                        {{-- Header --}}
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <h5 class="card-title mb-1">
+                                    <i class="bi bi-list-check me-1"></i>
+                                    Checklist
+                                </h5>
+
+                                <p class="text-muted small mb-0">
+                                    Track the smaller steps needed to finish this task.
+                                </p>
+                            </div>
+
+                            <span class="badge bg-primary">
+                {{ $completeChecklistItems }} / {{ $totalChecklistItems }}
+            </span>
+                        </div>
+
+                        {{-- Progress Bar --}}
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between mb-2">
+                <span class="small text-muted">
+                    Progress
+                </span>
+
+                                <span class="small fw-semibold">
+                    {{ $checklistProgress }}%
+                </span>
+                            </div>
+
+                            <div class="progress" style="height: 8px;">
+                                <div
+                                    class="progress-bar bg-success"
+                                    role="progressbar"
+                                    style="width: {{ $checklistProgress }}%;"
+                                    aria-valuenow="{{ $checklistProgress }}"
+                                    aria-valuemin="0"
+                                    aria-valuemax="100"
+                                ></div>
+                            </div>
+                        </div>
+
+                        {{-- Add Item Form --}}
+                        @can('create', [\App\Models\TaskChecklistItem::class, $task])
+                            <form
+                                action="{{ route('tasks.checklist-items.store', $task) }}"
+                                method="POST"
+                                class="mb-4"
+                            >
+                                @csrf
+
+                                <div class="input-group">
+                                    <input
+                                        type="text"
+                                        name="title"
+                                        class="form-control @error('title') is-invalid @enderror"
+                                        placeholder="Add a checklist item..."
+                                        value="{{ old('title') }}"
+                                    >
+
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-plus-lg me-1"></i>
+                                        Add
+                                    </button>
+                                </div>
+
+                                @error('title')
+                                <div class="text-danger small mt-1">
+                                    {{ $message }}
+                                </div>
+                                @enderror
+                            </form>
+                        @endcan
+
+                        {{-- Loop Checklist Items --}}
+                        <div class="list-group list-group-flush border-top pt-2">
+                            @forelse($checklistItems as $item)
+                                <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
+
+                                    <div class="d-flex align-items-center gap-3 overflow-hidden me-3">
+                                        {{-- Toggle Form (Checkbox) --}}
+                                        @can('update', $item)
+                                            <form action="{{ route('checklist-items.toggle', $item) }}" method="POST" class="m-0">
+                                                @csrf
+                                                @method('PATCH')
+                                                <input
+                                                    type="checkbox"
+                                                    class="form-check-input mt-0"
+                                                    style="width: 1.25rem; height: 1.25rem; cursor: pointer;"
+                                                    onChange="this.form.submit()"
+                                                    {{ $item->is_completed ? 'checked' : '' }}
+                                                >
+                                            </form>
+                                        @else
+                                            <input
+                                                type="checkbox"
+                                                class="form-check-input mt-0"
+                                                style="width: 1.25rem; height: 1.25rem;"
+                                                {{ $item->is_completed ? 'checked' : '' }}
+                                                disabled
+                                            >
+                                        @endcan
+
+                                        {{-- Item Title & Info --}}
+                                        <div class="text-truncate">
+                            <span class="d-block text-truncate {{ $item->is_completed ? 'text-decoration-line-through text-muted' : 'fw-semibold' }}">
+                                {{ $item->title }}
+                            </span>
+
+                                            <small class="text-muted d-block" style="font-size: 0.75rem;">
+                                                <i class="bi bi-person me-1"></i>{{ $item->creator->name ?? 'Unknown' }}
+                                                <span class="mx-1">&bull;</span>
+                                                <i class="bi bi-clock me-1"></i>{{ $item->created_at->diffForHumans() }}
+                                            </small>
+                                        </div>
+                                    </div>
+
+                                    {{-- Delete Button --}}
+                                    @can('delete', $item)
+                                        <form action="{{ route('checklist-items.destroy', $item) }}" method="POST" class="m-0">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button
+                                                type="submit"
+                                                class="btn btn-sm btn-link text-danger p-0 border-0"
+                                                onclick="return confirm('Delete this checklist item?')"
+                                                title="Delete Item"
+                                            >
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    @endcan
+
+                                </div>
+                            @empty
+                                <div class="text-center text-muted py-3 small">
+                                    No checklist items added yet.
+                                </div>
+                            @endforelse
+                        </div>
+
+                    </div>
+                </div>
+
+
+
                 {{-- Task Attachments --}}
                 <div class="card shadow-sm border-0 mb-4">
                     <div class="card-body">
@@ -118,11 +268,11 @@
                                             <small class="text-muted d-block" style="font-size: 0.8rem;">
                                                 <i class="bi bi-person me-1"></i> {{ $attachment->uploader->name ?? 'Unknown' }}
 
-                                                <span class="mx-1">•</span>
+                                                <span class="mx-1">&bull;</span>
 
                                                 <i class="bi bi-clock me-1"></i>{{ $attachment->created_at->diffForHumans() }}
 
-                                                <span class="mx-1">•</span>
+                                                <span class="mx-1">&bull;</span>
 
 
                                                 <i class="bi bi-hdd me-1"></i>
@@ -350,7 +500,11 @@
 
             </div>
 
+
+
         </div>
+
+
 
         {{-- Comments Section --}}
         <div class="row">

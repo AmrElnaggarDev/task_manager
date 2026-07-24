@@ -166,7 +166,16 @@ class TaskController extends Controller
             ->latest()
             ->get();
 
-        return view('tasks.show', compact('task', 'project', 'users', 'comments', 'attachments'));
+        $checklistItems = $task->checklistItems()
+            ->with('creator')
+            ->oldest()
+            ->get();
+
+        $totalChecklistItems = $checklistItems->count();
+        $completeChecklistItems = $checklistItems->where('is_completed', true)->count();
+        $checklistProgress = $totalChecklistItems > 0 ? round($completeChecklistItems/$totalChecklistItems*100,2) : 0;
+
+        return view('tasks.show', compact('task', 'project', 'users', 'comments', 'attachments', 'checklistItems', 'checklistProgress', 'totalChecklistItems', 'completeChecklistItems'));
     }
 
     /**
