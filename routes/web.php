@@ -5,6 +5,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectMemberController;
 use App\Http\Controllers\TaskAttachmentController;
+use App\Http\Controllers\TaskChecklistItemController;
 use App\Http\Controllers\TaskCommentController;
 use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Route;
@@ -41,6 +42,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('tasks/{task}/attachments', [TaskAttachmentController::class, 'store'])->name('tasks.attachments.store');
     Route::get('attachments/{attachment}/download', [TaskAttachmentController::class, 'download'])->name('attachments.download');
     Route::delete('attachments/{attachment}', [TaskAttachmentController::class, 'destroy'])->name('attachments.destroy');
+
+    // Task Checklist Items
+    Route::post ('tasks/{task}/checklist-items', [TaskChecklistItemController::class, 'store'])->name('tasks.checklist-items.store');
+    Route::patch('checklist-items/{checklistItem}', [TaskChecklistItemController::class, 'toggle'])->name('checklist-items.toggle');
+    Route::delete('checklist-items/{checklistItem}', [TaskChecklistItemController::class, 'destroy'])->name('checklist-items.destroy');
 
     // Project Members
     Route::post('projects/{project}/members', [ProjectMemberController::class, 'store'])->name('projects.members.store');
