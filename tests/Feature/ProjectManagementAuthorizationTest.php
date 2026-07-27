@@ -19,12 +19,16 @@ it('allows the project owner to open the edit page', function () {
 
 it('forbids a project member from opening the edit page', function () {
     $owner = User::factory()->create();
-    $outsider = User::factory()->create();
+    $member = User::factory()->create();
+
     $project = Project::factory()->create([
         'owner_id' => $owner->id,
     ]);
 
-    $response = $this->actingAs($outsider)
+    $project->members()->attach($member);
+
+    $response = $this
+        ->actingAs($member)
         ->get(route('projects.edit', $project));
 
     $response->assertForbidden();
