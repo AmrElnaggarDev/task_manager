@@ -6,10 +6,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use App\Models\TaskChecklistItem;
 
 class Task extends Model
 {
+    use HasFactory;
 
     protected $fillable = [
         'project_id', 'created_by', 'assigned_to', 'title', 'description', 'status', 'priority', 'deadline',
@@ -20,22 +20,22 @@ class Task extends Model
 
     ];
 
-    public function creator() :BelongsTo
+    public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function assignee () :BelongsTo
+    public function assignee(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assigned_to');
     }
 
-    public function project () :BelongsTo
+    public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class, 'project_id');
     }
 
-    public function comments () :HasMany
+    public function comments(): HasMany
     {
         return $this->hasMany(Comment::class, 'task_id');
     }
