@@ -5,7 +5,6 @@ namespace App\Policies;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class TaskPolicy
 {
@@ -21,7 +20,8 @@ class TaskPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Task $task, Project $project): bool    {
+    public function view(User $user, Task $task, Project $project): bool
+    {
         return $user->id === $project->owner_id
             || $project->members()->where('user_id', $user->id)->exists();
     }
@@ -32,14 +32,23 @@ class TaskPolicy
     public function create(User $user, Project $project): bool
     {
         return $user->id === $project->owner_id
-            || $project->members()->where('user_id', $user->id)->exists();    }
+            || $project->members()->where('user_id', $user->id)->exists();
+    }
 
     /**
      * Determine whether the user can update the model.
      */
     public function update(User $user, Task $task): bool
     {
-        return $user->id === $task->created_by;
+        $project = $task->project;
+        if (! $project) {
+            return false;
+        }
+
+        $canAccessProject = $user->id === $project->owner_id
+            || $project->members()->where('user_id', $user->id)->exists();
+
+        return $canAccessProject && $user->id === $task->created_by;
     }
 
     /**
@@ -47,7 +56,15 @@ class TaskPolicy
      */
     public function delete(User $user, Task $task): bool
     {
-        return $user->id === $task->created_by;
+        $project = $task->project;
+        if (! $project) {
+            return false;
+        }
+
+        $canAccessProject = $user->id === $project->owner_id
+            || $project->members()->where('user_id', $user->id)->exists();
+
+        return $canAccessProject && $user->id === $task->created_by;
     }
 
     /**
@@ -65,11 +82,12 @@ class TaskPolicy
     {
         return false;
     }
+
     public function updateStatus(User $user, Task $task): bool
     {
         $project = $task->project;
         $canAccessProject = $user->id === $project->owner_id
-            || $project->members()->where ('user_id', $user->id)->exists();
+            || $project->members()->where('user_id', $user->id)->exists();
         $canUpdateStatus = $user->id === $task->created_by
             || $user->id === $task->assigned_to;
 
